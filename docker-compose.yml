@@ -1,0 +1,26 @@
+version: "3.9"
+
+networks:
+  app:
+    driver: bridge
+
+services:
+  library:
+    build: ./src/library
+    ports:
+      - 3002:3000
+    volumes: 
+      - ./src/library/files:/app/files
+    depends_on:
+      - counter
+    networks:
+      - app
+
+  counter:
+    build: ./src/counter
+    volumes: 
+      - ./src/counter:/app
+    ports:
+      - 3003:3000
+    networks:
+      - app
