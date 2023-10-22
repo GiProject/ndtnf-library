@@ -1,51 +1,59 @@
 const router = require("express").Router();
-const { Book } = require("../../models/Book");
-const store = require("../../store");
+const Book = require("../../models/Book");
 const fileMiddleware = require("../../middleware/file");
 const path = require("path");
 
-router.get('/', (req, res) => {
-    const {books} = store;
-    
-    res.status(200);
-    res.json(books);
-    res.end();
-});
+router.get('/', async (req, res) => {
+    try {
+        const books = await Book.find().select("-__v");
 
-router.get('/:id', (req, res) => {
-    const {books} = store;
-    const {id} = req.params;
-    const bookIndex = books.findIndex(el => el.id === id);
-
-    if (bookIndex !== -1) {
-        res.json(books[bookIndex]);
-    } else {
-        res.status(404);
-        res.json('not found');
+        res.status(200);
+        res.json(books);
+    } catch (e) {
+        res.status(400).send("Bad request");
     }
     res.end();
 });
 
-router.get('/:id/download', (req, res) => {
-    const {books} = store;
+router.get('/:id', async (req, res) => {
     const {id} = req.params;
-    const bookIndex = books.findIndex(el => el.id === id);
 
-    if (books[bookIndex]) {
-		res.download(path.join(__dirname, "../..", books[bookIndex].fileBook), (err) => {
-			if (err) {
-				res.status(404)
-                res.json({result: "not found"});
-			}
-		});
-	} else {
-		res.status(404);
-        res.json({result: "not found"});
-	}
+    try {
+        const book = await Book.findById(id).select("-__v");
+
+        res.status(200).json(book);
+    } catch (e) {
+        res.status(404).send("not found");
+    }
+
+    res.end();
 });
 
-router.post('/',  fileMiddleware.single("fileBook"), (req, res) => {
-    const {books} = store;
+router.get('/:id/download', async (req, res) => {
+    const {id} = req.params;
+
+    try {
+        const book = await Book.findById(id).select("-__v");
+
+        if (book) {
+            res.download(path.join(__dirname, "../..", book.fileBook), (err) => {
+                if (err) {
+                    res.status(404).send("not found");
+                }
+            });
+        } else {
+            res.status(404).send('not found');
+        }
+
+        res.status(200).json(book);
+    } catch (e) {
+        res.status(404).send("not found");
+    }
+
+    res.end();
+});
+
+router.post('/',  fileMiddleware.single("fileBook"), async (req, res) => {
     const {title, description, authors, favorite, fileCover, fileName} = req.body;
     const {file} = req;
     let fileBook = '';
@@ -54,19 +62,27 @@ router.post('/',  fileMiddleware.single("fileBook"), (req, res) => {
         fileBook = file.path 
     }
 
-    const newBook = new Book(title, description, authors, favorite, fileCover, fileName, fileBook);
-    books.push(newBook);
+    try {
+        const newBook = new Book({title, description, authors, favorite, fileCover, fileName});
+        newBook.save();
 
-    res.status(201);
-    res.json(newBook);
+        res.status(201).json(newBook);
+    } catch (e) {
+        console.log(e);
+        res.status(400).send('Bad request');
+    }
+
     res.end();
 });
 
-router.put('/:id',  fileMiddleware.single("fileBook"), (req, res) => {
-    const {books} = store;
+router.put('/:id',  fileMiddleware.single("fileBook"), async (req, res) => {
     const {id} = req.params;
     const {title, description, authors, favorite, fileCover, fileName} = req.body;
-    const bookIndex = books.findIndex(el => el.id === id);
+    const book = await Book.findById(id).select("-__v");
+
+    if (!book) {
+        res.status(404).send('not found').end();
+    }
 
     const {file} = req;
     let fileBook = '';
@@ -75,32 +91,28 @@ router.put('/:id',  fileMiddleware.single("fileBook"), (req, res) => {
         fileBook = file.path 
     }
 
-    if (bookIndex !== -1) {
-        books[bookIndex] = {...books[bookIndex],title, description, authors, favorite, fileCover, fileName, fileBook}
+    book.title = title;
+    book.description = description;
+    book.authors = authors;
+    book.favorite = favorite;
+    book.fileCover = fileCover;
+    book.fileName = fileName;
 
-        res.status(200);
-        res.json(books[bookIndex]);
-    } else {
-        res.status(404);
-        res.json('not found');
-    }
-    res.end();
+    book.save();
+
+    res.status(200).json(book).end();
 });
 
-router.delete('/:id', (req, res) => {
-    const {books} = store;
+router.delete('/:id', async (req, res) => {
     const {id} = req.params;
-    const bookIndex = books.findIndex(el => el.id === id);
+    try {
+        await Book.deleteOne({_id: id});
 
-    if (bookIndex !== -1) {
-        books.splice(bookIndex, 1)
-
-        res.status(200);
-        res.json('ok');
-    } else {
-        res.status(404);
-        res.json('not found');
+        res.status(200).send("ok");
+    } catch (e) {
+        res.status(404).send("not found");
     }
+
     res.end();
 });
 
