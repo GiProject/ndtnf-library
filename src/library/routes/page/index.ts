@@ -1,6 +1,8 @@
-const router = require("express").Router();
+import { Router} from "express";
 
-router.get("/", (_req: any, res: any) => {
+const router: Router = Router();
+
+router.get("/", (_req: any, res: any): void => {
 	res.render("index", { title: "Главная" });
 });
 

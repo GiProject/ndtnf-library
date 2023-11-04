@@ -1,8 +1,8 @@
 import { Router } from 'express';
 
-const router = Router();
+const router: Router = Router();
 
-router.post('/login', (req: any, res: any) => {
+router.post('/login', (req: any, res: any): void => {
     res.status(200);
     res.json({
         id: 1,

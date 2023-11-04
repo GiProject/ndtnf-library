@@ -2,6 +2,7 @@ import BookRepositoryInterface from '../interfaces/BookRepositoryInterface';
 import { injectable } from "inversify";
 import { IBook } from '../interfaces/models/IBook'
 import {Book} from "../models/Book";
+import BookDto from "../interfaces/dto/BookDto";
 
 @injectable()
 export default class BookRepository implements BookRepositoryInterface {
@@ -21,7 +22,7 @@ export default class BookRepository implements BookRepositoryInterface {
         }
     }
 
-    async createBook(data: any): Promise<IBook> {
+    async createBook(data: BookDto): Promise<IBook> {
         try {
             const book = new Book(data);
             await book.save();
@@ -31,7 +32,7 @@ export default class BookRepository implements BookRepositoryInterface {
         }
     }
 
-    async updateBook(id: string, data: object): Promise<IBook> {
+    async updateBook(id: string, data: BookDto): Promise<IBook> {
         try {
             return await Book.findByIdAndUpdate(id, data)
         } catch (e) {
