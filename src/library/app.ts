@@ -20,21 +20,21 @@ app.use('/api/user', userRouter);
 
 app.use(error);
 
-(async() => {
+(async () => {
     try {
-		const mongodb = `mongodb://mongo:27017/library`;
-		await mongoose.connect(mongodb);
+        const mongodb = `mongodb://mongo:27017/library`;
+        await mongoose.connect(mongodb);
 
         const mongod = mongoose.connection;
 
-        mongod.once('open', function (){
+        mongod.once('open', function () {
             mongod.db.createCollection("book");
         })
 
-		app.listen(port, () => {
-			console.log(`Server started on port ${port}`);
-		});
-	} catch (e) {
-		console.log(e);
-	}
+        app.listen(port, () => {
+            console.log(`Server started on port ${port}`);
+        });
+    } catch (e) {
+        console.log(e);
+    }
 })();
