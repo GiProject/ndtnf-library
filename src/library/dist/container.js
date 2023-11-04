@@ -8,4 +8,4 @@ var inversify_1 = require("inversify");
 require("reflect-metadata");
 var BookRepository_1 = __importDefault(require("./repositories/BookRepository"));
 exports.container = new inversify_1.Container();
-exports.container.bind(BookRepository_1.default).to(BookRepository_1.default).inSingletonScope();
+exports.container.bind(BookRepository_1.default).toSelf();
