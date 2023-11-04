@@ -1,7 +1,7 @@
 const router = require("express").Router();
 
-router.get("/", (_req, res) => {
+router.get("/", (_req: any, res: any) => {
 	res.render("index", { title: "Главная" });
 });
 
-module.exports = router;
+export default router;

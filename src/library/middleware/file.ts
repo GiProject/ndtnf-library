@@ -1,12 +1,12 @@
-const multer = require('multer')
+import multer from 'multer'
 
 const storage = multer.diskStorage({
-    destination(req, file, cb){
+    destination(req: any, file: any, cb: any){
         cb(null, 'files/books')
     },
-    filename(req, file, cb) {
+    filename(req: any, file: any, cb: any) {
         cb(null, `${Date.now()}-${file.originalname}`)
     }
 })
 
-module.exports = multer({storage})
+export default multer({storage})

@@ -1,12 +1,16 @@
-const router = require("express").Router();
-const { Book } = require("../../models/Book");
-const store = require("../../store");
-const fileMiddleware = require("../../middleware/file.js");
-const path = require("path");
-const Counter = require("../../services/counter");
+import { Router } from 'express';
+import { Book } from '../../models/Book';
 
-router.get("/", (_req, res) => {
-    const {books} = store;
+import fileMiddleware from '../../middleware/file';
+import Counter from '../../services/counter';
+import {container} from "../../container";
+import BookRepository from "../../repositories/BookRepository";
+
+const router = Router();
+const bookRepository = container.get(BookRepository);
+router.get("/", async (_req, res) => {
+    const books = await bookRepository.getBooks();
+
 	res.render("books/list", { title: "Книги", books: books });
 });
 
@@ -14,27 +18,24 @@ router.get("/create", (_req, res) => {
 	res.render("books/create", { title: "Добавление книги", book: {} });
 });
 
-router.post("/create", fileMiddleware.single("fileBook"), (req, res) => {
-    const {books} = store;
-    const {title, description, authors, favorite, fileCover, fileName} = req.body;
+router.post("/create", fileMiddleware.single("fileBook"), async (req, res) => {
+    const {title, description, authors, favorite, fileCover, fileName, } = req.body;
     const {file} = req;
     let fileBook = '';
 
     if (file) {
-        fileBook = file.path 
+        fileBook = file.path
     }
 
-    const newBook = new Book(title, description, authors, favorite, fileCover, fileName, fileBook);
-    books.push(newBook);
+    await bookRepository.createBook({title, description, authors, favorite, fileName, fileCover, fileBook});
 
     res.status(201);
     res.redirect("/books/");
 });
 
-router.get("/update/:id", (req, res) => {
+router.get("/update/:id", async (req, res) => {
 	const { id } = req.params;
-    const {books} = store;
-	let book = books.find((b) => b.id === id);
+    const book = await bookRepository.getBook(id);
 
 	if (book) {
 		res.render("books/update", {
@@ -46,46 +47,39 @@ router.get("/update/:id", (req, res) => {
 	}
 });
 
-router.post("/update/:id", fileMiddleware.single("fileBook"), (req, res) => {
-	const {books} = store;
+router.post("/update/:id", fileMiddleware.single("fileBook"), async (req, res) => {
     const {id} = req.params;
     const {title, description, authors, favorite, fileCover, fileName} = req.body;
-    const bookIndex = books.findIndex(el => el.id === id);
-
     const {file} = req;
     let fileBook = '';
 
     if (file) {
-        fileBook = file.path 
+        fileBook = file.path
     }
+    await bookRepository.updateBook(id, {title, description, authors, favorite, fileName, fileCover, fileBook});
 
-    if (bookIndex !== -1) {
-        books[bookIndex] = {...books[bookIndex],title, description, authors, favorite, fileCover, fileName, fileBook}
-
-        res.redirect("/books/view/" + id);
-    } else {
-        res.status(404).redirect("/404");
-    }
-
+    res.redirect("/books/view/" + id);
 });
 
-router.get("/view", (_req, res) => {
+router.get("/view", async (_req, res) => {
+    const books = await bookRepository.getBooks();
 	res.render("books/view", { title: "Книги", books: books });
 });
 
 router.get("/view/:id", async (req, res) => {
-    const { books } = store;
-	const { id } = req.params;
-	const book = books.find((b) => b.id === id);
+    const {id} = req.params;
+
+    const book = await bookRepository.getBook(id);
 
     let counter = new Counter; 
 
-    counter.setViewCount(id);
+    await counter.setViewCount(id);
     let bookViewCountPromise = await counter.getViewCount(id);
+    // @ts-ignore
     let bookViewCount = await bookViewCountPromise.text();
 
 	if (book) {
-		res.render("books/view", { 
+		res.render("books/view", {
             title: "Просмотр книги",
             book: book,
             bookViewCount: bookViewCount
@@ -95,17 +89,12 @@ router.get("/view/:id", async (req, res) => {
 	}
 });
 
-router.post("/delete/:id", (req, res) => {
-	const { id } = req.params;
-    const { books } = store;
-	const index = books.findIndex((b) => b.id === id);
+router.post("/delete/:id", async (req, res) => {
+    const {id} = req.params;
 
-	if (index !== -1) {
-		books.splice(index, 1);
-		res.status(200).redirect("/books/");
-	} else {
-		res.status(404).redirect("/404");
-	}
+    await bookRepository.deleteBook(id);
+
+    res.status(200).redirect("/books/");
 });
 
-module.exports = router;
+export default router;

@@ -1,6 +1,8 @@
-const router = require("express").Router();
+import { Router } from 'express';
 
-router.post('/login', (req, res) => {
+const router = Router();
+
+router.post('/login', (req: any, res: any) => {
     res.status(200);
     res.json({
         id: 1,
@@ -9,4 +11,4 @@ router.post('/login', (req, res) => {
     res.end();
 });
 
-module.exports = router;
+export default router;

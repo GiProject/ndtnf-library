@@ -1,7 +1,7 @@
 class Counter {
     url = 'http://counter:3000';
 
-    async getViewCount (bookId) {
+    async getViewCount (bookId: string) {
         try {
             return await fetch(`${this.url}/counter/${bookId}`);
         } catch(e) {
@@ -10,7 +10,7 @@ class Counter {
         return 0;
     }
 
-    async setViewCount (bookId) {
+    async setViewCount (bookId: string) {
         try {
             await fetch(`${this.url}/counter/${bookId}/incr` ,{
                 method: 'POST'
@@ -21,4 +21,4 @@ class Counter {
     }
 }
 
-module.exports = Counter;
+export default Counter;
