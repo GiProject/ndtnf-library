@@ -1,4 +1,6 @@
-module.exports = (req, res) => {
+const error = (req, res) => {
     res.status(404)
     res.json('404 | страница не найдена')
 }
+
+export default error;

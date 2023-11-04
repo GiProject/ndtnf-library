@@ -1,7 +1,7 @@
 const router = require("express").Router();
 const { Book } = require("../../models/Book");
 const store = require("../../store");
-const fileMiddleware = require("../../middleware/file");
+const fileMiddleware = require("../../middleware/file.js");
 const path = require("path");
 const Counter = require("../../services/counter");
 
