@@ -5,20 +5,20 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc --project ./tsconfig.json --watch",
-    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx src",
+    "lint": "eslint --cache --ext .js,.jsx,.ts,.tsx .",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc --project ./tsconfig.json && node ./dist/app.js"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/GiProject/nodejs-library.git"
+    "url": "git+https://github.com/GiProject/ndtnf-library.git"
   },
   "author": "Evgenii Kulinichev",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/GiProject/nodejs-library/issues"
+    "url": "https://github.com/GiProject/ndtnf-library/issues"
   },
-  "homepage": "https://github.com/GiProject/nodejs-library#readme",
+  "homepage": "https://github.com/GiProject/ndtnf-library#readme",
   "dependencies": {
     "ejs": "^3.1.9",
     "express": "^4.18.2",

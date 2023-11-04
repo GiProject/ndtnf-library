@@ -71,7 +71,7 @@ router.get("/view/:id", async (req, res) => {
 
     const book = await bookRepository.getBook(id);
 
-    let counter = new Counter; 
+    const counter = new Counter;
 
     await counter.setViewCount(id);
     let bookViewCountPromise = await counter.getViewCount(id);
